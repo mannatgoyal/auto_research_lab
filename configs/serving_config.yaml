@@ -1,0 +1,8 @@
+# Configuration for Model Serving & Production Inference API
+serving:
+  model_source: "mlflow"
+  tracking_uri: "sqlite:///mlflow.db"
+  run_id: "f35b71a06d0c4160b0458018252f964a"  # Explicit child model run (logistic_regression)
+  host: "127.0.0.1"
+  port: 8000
+  service_name: "breast-cancer-diagnostic-service"

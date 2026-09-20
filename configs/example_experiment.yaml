@@ -1,0 +1,54 @@
+name: "tabular_model_comparison"
+description: "Empirical comparison of Classical ML vs PyTorch MLP on tabular binary classification with inference latency benchmarking."
+seed: 42
+
+dataset:
+  name: "breast_cancer"
+  source: "UCI Breast Cancer Wisconsin (Diagnostic)"
+
+split:
+  strategy: "stratified"
+  test_size: 0.2
+  val_size: 0.1
+  seed: 42
+
+preprocessing:
+  numeric_imputer: "median"
+  scaler: "standard"
+  encode_categoricals: true
+
+models:
+  - name: "logistic_regression"
+    hyperparameters:
+      C: 1.0
+      max_iter: 1000
+      solver: "lbfgs"
+
+  - name: "random_forest"
+    hyperparameters:
+      n_estimators: 100
+      max_depth: 6
+      min_samples_split: 2
+
+  - name: "xgboost"
+    hyperparameters:
+      n_estimators: 100
+      max_depth: 4
+      learning_rate: 0.05
+      subsample: 0.8
+
+  - name: "torch_mlp"
+    hyperparameters:
+      hidden_dims: [64, 32]
+      lr: 0.002
+      weight_decay: 0.0001
+      batch_size: 32
+      max_epochs: 80
+      dropout_rate: 0.1
+      early_stopping_patience: 10
+
+latency:
+  batch_sizes: [1, 16]
+  warmup_iterations: 25
+  benchmark_iterations: 200
+  device: "cpu"
