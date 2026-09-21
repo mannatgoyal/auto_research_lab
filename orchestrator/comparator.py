@@ -268,15 +268,16 @@ class EvidenceComparator:
         """Formulates an evidence-grounded research conclusion and lists limitations."""
         lines: List[str] = [f"Empirical evaluation for research question: '{question}'."]
         limitations: List[str] = [
-            "Evaluated on a single deterministic seed (seed 42). Multi-seed variance was not assessed in this run.",
-            "Default hyperparameters used; automated hyperparameter tuning was not requested.",
+            "Evaluated on a single deterministic seed (seed 42). Multi-seed variance and statistical significance tests were not assessed in this run.",
+            "Default baseline hyperparameters used; automated hyperparameter tuning was not requested.",
+            "Conclusions reflect performance on this specific dataset partition and preprocessing pipeline, and do not imply universal algorithmic superiority.",
         ]
 
         for c in comparisons:
             if c.status == "VERIFIED":
                 lines.append(
                     f"- {c.metric_name}: {c.model_a}={c.value_a}, {c.model_b}={c.value_b} (delta={c.delta}). "
-                    f"Superior model: {c.superior_model}."
+                    f"Higher-performing candidate on this partition: {c.superior_model}."
                 )
             else:
                 lines.append(f"- {c.metric_name}: Evidence was UNAVAILABLE.")

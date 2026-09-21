@@ -34,6 +34,9 @@ We enforce a strict separation of concerns:
 - Deterministic Python modules (`ml/datasets/`, `ml/models/`, `ml/evaluation/`) perform the actual computations: data profiling, stratified splitting, model fitting, metric calculation, and microsecond latency measurement.
 - The agent is never permitted to calculate, fabricate, or manipulate experimental numbers.
 
+> [!NOTE]
+> **Methodological Boundary**: This architecture guarantees that every reported number reflects actual deterministic code execution rather than LLM generation. However, it does not claim that findings from a single benchmark run generalize across all domains or hyperparameter settings; conclusions are strictly bounded to the empirical setup tested.
+
 ---
 
 ## 3. Why Fitted Model Objects Are Kept Outside JSON-Safe Results

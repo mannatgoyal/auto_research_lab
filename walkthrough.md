@@ -1,9 +1,11 @@
-# Autonomous ML Research Lab: Phase 1, Phase 2 & Phase 3 Walkthrough
+# Autonomous ML Research Lab: Phases 1–5 End-to-End Walkthrough
 
 This document records the architecture, audit hardening, implementation, and empirical verification for:
 1. **Phase 1: Deterministic ML Research Engine**
 2. **Phase 2: MLflow Experiment Tracking & Cryptographic Lineage**
 3. **Phase 3: Model Serving & Production Inference**
+4. **Phase 4: Model Context Protocol (MCP) Server Layer**
+5. **Phase 5: Agentic Research Orchestration & Evidence Synthesis**
 
 ---
 
@@ -94,68 +96,20 @@ graph TD
 ## 3. Verification & Test Results
 
 ### Complete Test Suite (`pytest -v`)
-All **56 unit and integration tests passed in 86.15 seconds**:
+All **96 unit and integration tests passed in automated CI**:
+- **Deterministic ML Engine**: 25 tests (profiling, fingerprinting, stratified splitting, model wrappers, batch-1 safety).
+- **Evaluation & Latency**: 5 tests (classification metrics, confusion matrix, microsecond percentiles).
+- **MLflow Lineage**: 4 tests (parent/child hierarchy, artifact ownership, no-tracking mode).
+- **Serving API**: 11 tests (strict schemas, NaN/Inf rejection, health endpoints, direct-vs-API mathematical equivalence).
+- **MCP Server & Security**: 23 tests (tool registration, schema validation, 3-tier permissions, audit logging, path traversal rejection).
+- **Orchestrator & Evidence Synthesis**: 28 tests (hypothesis generation, budget bounds, deterministic delta computation, zero-hallucination provenance).
 
-```text
-tests/integration/test_experiment_pipeline.py::test_full_pipeline_execution PASSED [  1%]
-tests/integration/test_experiment_pipeline.py::test_pipeline_reproducibility PASSED [  3%]
-tests/integration/test_lineage_invariant.py::test_lineage_invariant_end_to_end PASSED [  5%]
-tests/integration/test_serving_api.py::test_health_endpoint_when_loaded PASSED [  7%]
-tests/integration/test_serving_api.py::test_health_endpoint_when_unloaded PASSED [  8%]
-tests/integration/test_serving_api.py::test_model_metadata_endpoint PASSED [ 10%]
-tests/integration/test_serving_api.py::test_predict_valid_request PASSED [ 12%]
-tests/integration/test_serving_api.py::test_predict_flat_dictionary_support PASSED [ 14%]
-tests/integration/test_serving_api.py::test_predict_missing_feature_rejected PASSED [ 16%]
-tests/integration/test_serving_api.py::test_predict_unexpected_field_rejected PASSED [ 17%]
-tests/integration/test_serving_api.py::test_predict_nan_rejected PASSED  [ 19%]
-tests/integration/test_serving_api.py::test_predict_when_model_unloaded_returns_503 PASSED [ 21%]
-tests/integration/test_serving_api.py::test_mathematical_equivalence_direct_vs_api PASSED [ 23%]
-tests/unit/test_api_schemas.py::test_valid_30_features PASSED            [ 25%]
-tests/unit/test_api_schemas.py::test_missing_feature_rejected PASSED     [ 26%]
-tests/unit/test_api_schemas.py::test_extra_unexpected_field_rejected PASSED [ 28%]
-tests/unit/test_api_schemas.py::test_invalid_type_rejected PASSED        [ 30%]
-tests/unit/test_api_schemas.py::test_nan_value_rejected PASSED           [ 32%]
-tests/unit/test_api_schemas.py::test_inf_value_rejected PASSED           [ 33%]
-tests/unit/test_api_schemas.py::test_prediction_request_supports_flat_and_nested PASSED [ 35%]
-tests/unit/test_config.py::test_valid_yaml_parsing PASSED                [ 37%]
-tests/unit/test_config.py::test_wrapped_experiment_key PASSED            [ 39%]
-tests/unit/test_config.py::test_invalid_split_sizes_raise_error PASSED   [ 41%]
-tests/unit/test_config.py::test_empty_models_raise_error PASSED          [ 42%]
-tests/unit/test_dataset_loader.py::test_load_breast_cancer PASSED        [ 44%]
-tests/unit/test_dataset_loader.py::test_fingerprint_reproducibility PASSED [ 46%]
-tests/unit/test_dataset_loader.py::test_profile_dataset PASSED           [ 48%]
-tests/unit/test_dataset_loader.py::test_invalid_dataset_name_raises PASSED [ 50%]
-tests/unit/test_latency.py::test_latency_benchmark_percentiles PASSED    [ 51%]
-tests/unit/test_latency.py::test_batch_latency_scaling PASSED            [ 53%]
-tests/unit/test_metrics.py::test_perfect_predictions PASSED              [ 55%]
-tests/unit/test_metrics.py::test_imperfect_predictions PASSED            [ 57%]
-tests/unit/test_metrics.py::test_metric_serialization PASSED             [ 58%]
-tests/unit/test_mlflow_tracker.py::test_mlflow_parent_and_child_runs PASSED [ 60%]
-tests/unit/test_mlflow_tracker.py::test_mlflow_model_logging_disabled PASSED [ 62%]
-tests/unit/test_model_loader.py::test_model_loader_success PASSED        [ 64%]
-tests/unit/test_model_loader.py::test_model_loader_nonexistent_run PASSED [ 66%]
-tests/unit/test_model_loader.py::test_model_loader_missing_parent_tag PASSED [ 67%]
-tests/unit/test_models.py::test_model_lifecycle[logistic_regression] PASSED [ 69%]
-tests/unit/test_models.py::test_model_lifecycle[random_forest] PASSED    [ 71%]
-tests/unit/test_models.py::test_model_lifecycle[xgboost] PASSED          [ 73%]
-tests/unit/test_models.py::test_model_lifecycle[torch_mlp] PASSED        [ 75%]
-tests/unit/test_models.py::test_seed_reproducibility PASSED              [ 76%]
-tests/unit/test_models.py::test_torch_mlp_single_sample_inference PASSED [ 78%]
-tests/unit/test_models.py::test_torch_mlp_batch_size_one_safety PASSED   [ 80%]
-tests/unit/test_preprocessing.py::test_preprocessing_shapes PASSED       [ 82%]
-tests/unit/test_preprocessing.py::test_standard_scaler_train_normalization PASSED [ 83%]
-tests/unit/test_preprocessing.py::test_pipeline_transform_unseen_data PASSED [ 85%]
-tests/unit/test_preprocessing.py::test_zero_data_leakage_mathematical_proof PASSED [ 87%]
-tests/unit/test_runner_modular.py::test_inspect_dataset_profile_callable PASSED [ 89%]
-tests/unit/test_runner_modular.py::test_train_and_evaluate_model_callable PASSED [ 91%]
-tests/unit/test_runner_modular.py::test_config_hash_determinism PASSED   [ 92%]
-tests/unit/test_splitters.py::test_create_splits_no_overlap PASSED       [ 94%]
-tests/unit/test_splitters.py::test_split_determinism PASSED              [ 96%]
-tests/unit/test_splitters.py::test_different_seeds_produce_different_splits PASSED [ 98%]
-tests/unit/test_splitters.py::test_split_with_zero_validation PASSED     [100%]
-
-======================== 56 passed in 86.15s ========================
-```
+> [!NOTE]
+> **Empirical Scope & Methodological Boundaries**:
+> The empirical results described in this walkthrough and accompanying benchmarks demonstrate behavior exclusively under the tested conditions:
+> - Evaluated on the UCI Breast Cancer Wisconsin (Diagnostic) tabular dataset (569 samples, 30 features, binary classification).
+> - Evaluated across a single deterministic split (seed 42, 80/10/10). Findings describe observed differences on this sample partition rather than statistical significance ($p$-values) across diverse seeds.
+> - Default baseline hyperparameters were utilized; conclusions do not imply universal algorithmic superiority across different hyperparameter tunings or domains.
 
 ---
 
